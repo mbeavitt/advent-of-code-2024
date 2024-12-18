@@ -13,11 +13,11 @@ int read_line(int *a, int len, FILE *fp);
 // reads the array, returning true if it's 'safe', false if 'unsafe'
 bool check_line(int *a, int len);
 
-int main(int argv, char **argc)
+int main(int argc, char **argv)
 {
     // check that an input file was given
-    if (argv != 2) {
-        printf("Usage: %s <input.txt>\n", argc[0]);
+    if (argc != 2) {
+        printf("Usage: %s <input.txt>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
@@ -27,10 +27,10 @@ int main(int argv, char **argc)
 
     int safe_lines = 0;
 
-    fp = fopen(argc[1], "r");
+    fp = fopen(argv[1], "r");
 
     if (fp == NULL) {
-        printf("Could not open file %s\n", argc[0]);
+        printf("Could not open file %s\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
