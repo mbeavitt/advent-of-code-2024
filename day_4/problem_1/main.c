@@ -24,19 +24,25 @@ int main(int argv, char **argc)
     int data_size;
     int xmasses = 0;
 
+    // get a file descriptor for the input data
     fp = fopen(argc[1], "r");
 
+    // check that opening the file actually worked 
+    // (e.g. misspelled filename will trigger this)
     if (fp == NULL) {
         fprintf(stderr, "Unable to open file %s\n", argc[1]);
         exit(EXIT_FAILURE);
     }
 
+    // read the file into a matrix, resizing the matrix's memory as we go
+    // (should put this in a function...)
     i = j = 0;
     while ((ch = getc(fp)) > 0) {
         if (i == matrix_size || j == matrix_size) {
 
+            // starting from a matrix size of 0, rescale matrix if data gets too big
+            // allocate memory for rows
             fprintf(stderr, "Reallocating\n");
-            // allocate rows
             size_t newnum = (matrix_size + 2) * 2;
             char **newptr = (char **) realloc(matrix, newnum * sizeof(char*));
             if (newptr == NULL) {
@@ -44,7 +50,7 @@ int main(int argv, char **argc)
                 exit(EXIT_FAILURE);
             }
 
-            // allocate columns
+            // allocate memory for columns
             for (int i = 0; i < newnum; i++) {
                 if (i < matrix_size) {
                     // reallocate if column exists already
@@ -62,11 +68,12 @@ int main(int argv, char **argc)
                     }
                 }
             }
-
+            // finishing rescaling
             matrix_size = newnum;
             matrix = newptr;
         }
 
+        // actually input the data
         if (ch == '\n') {
             i++;
             j = 0;
@@ -76,11 +83,13 @@ int main(int argv, char **argc)
         }
     }
 
+    // assigning final matrix size to 'data_size'
     data_size = i;
 
+    // print the matrix to see what's going on
     print_matrix(matrix, data_size);
 
-    // checking rows
+    // checking rows for XMAS (forward direction)
     for (int i = 0; i < data_size; i++) {
         for (int j = 0; j < data_size-3; j++) {
             strncpy(window, matrix[i] + j, 4);
@@ -91,7 +100,8 @@ int main(int argv, char **argc)
             }
         }
     }
-    // checking columns
+
+    // checking columns for XMAS (forward direction)
     char buffer[data_size+1];
     char *ptr = buffer;
     for (int i = 0; i < data_size; i++) {
@@ -102,7 +112,7 @@ int main(int argv, char **argc)
         }
         buffer[data_size] = '\0';
 
-        // same approach as before
+        // same approach as rows, but on buffer
         for (int j = 0; j < data_size-3; j++) {
             strncpy(window, buffer + j, 4);
             window[4] = '\0';
@@ -111,11 +121,11 @@ int main(int argv, char **argc)
                 xmasses++;
             }
         }
-
         // reset the buffer
         ptr = buffer;
     }
 
+    // free up the memory for the matrix before exit
     free_matrix(matrix, matrix_size);
 }
 
