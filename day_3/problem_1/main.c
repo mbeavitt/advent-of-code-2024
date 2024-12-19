@@ -6,9 +6,6 @@
 
 #define ARRAY_SIZE(arr) (sizeof((arr)) / sizeof((arr)[0]))
 
-char *str = "1) John Driverhacker 2) John Doe 3) John Foo;";
-char *re = "John Doe";
-
 int main(int argc, char **argv)
 {
     if (argc != 2) {
@@ -16,46 +13,59 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    char *s =  str;
+    // regex variables
     regex_t    regex;
     regmatch_t pmatch[1];
     regoff_t   off, len;
+    char *re = "mul\\([0-9]+,[0-9]+\\)";
 
-    if (regcomp(&regex, re, REG_NEWLINE))
-        exit(EXIT_FAILURE);
-
-    printf("String = \"%s\"\n", str);
-    printf("Matches:\n");
-
-    for (unsigned int i = 0; ; i++) {
-        if (regexec(&regex, s, ARRAY_SIZE(pmatch), pmatch, 0))
-            break;
-
-        off = pmatch[0].rm_so + (s - str);
-        len = pmatch[0].rm_eo - pmatch[0].rm_so;
-        printf("#%zu:\n", i);
-        printf("offset = %jd; length = %jd\n", (intmax_t) off,
-                (intmax_t) len);
-        printf("substring = \"%.*s\"\n", len, s + pmatch[0].rm_so);
-
-        s += pmatch[0].rm_eo;
-    }
-
-/*
+    // file read variables
     char *line = NULL;
-    size_t len = 0;
+    size_t line_len = 0;
     ssize_t nread;
-
     FILE *fp = fopen(argv[1], "r");
+
+    // other variables
+    int val_1, val_2;
+    int result = 0;
+    char match[20];
+
     if (fp == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    while ((nread = getline(&line, &len, fp)) != -1) {
-        fwrite(line, nread, 1, stdout);
+
+    while ((nread = getline(&line, &line_len, fp)) != -1) {
+
+        char *s =  line;
+
+        if (regcomp(&regex, re, REG_EXTENDED))
+            exit(EXIT_FAILURE);
+
+        printf("String = \"%s\"\n", line);
+        printf("Matches:\n");
+
+        for (unsigned int i = 0; ; i++) {
+            if (regexec(&regex, s, ARRAY_SIZE(pmatch), pmatch, 0))
+                break;
+
+            off = pmatch[0].rm_so + (s - line);
+            line_len = pmatch[0].rm_eo - pmatch[0].rm_so;
+
+            strncpy(match, s + pmatch[0].rm_so, line_len);
+            match[line_len] = '\0'; // I thought strncpy did this but apparently not
+
+            sscanf(match, "mul(%d,%d)", &val_1, &val_2);
+
+            printf("%d, %d\n", val_1, val_2);
+
+            result += (int) (val_1 * val_2);
+            s += pmatch[0].rm_eo;
+        }
     }
 
     free(line);
     fclose(fp);
-*/
+
+    printf("Result: %d\n", result);
 }
