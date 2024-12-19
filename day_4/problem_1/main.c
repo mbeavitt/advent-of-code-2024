@@ -86,6 +86,7 @@ int main(int argv, char **argc)
             strncpy(window, matrix[i] + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
+                printf("XMAS found! (row)\n");
                 xmasses++;
             }
         }
@@ -106,6 +107,7 @@ int main(int argv, char **argc)
             strncpy(window, buffer + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
+                printf("XMAS found! (column)\n");
                 xmasses++;
             }
         }
