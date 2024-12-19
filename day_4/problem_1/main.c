@@ -89,21 +89,41 @@ int main(int argv, char **argc)
     // print the matrix to see what's going on
     print_matrix(matrix, data_size);
 
+    // initialise buffer and buffer pointer to
+    // reverse strings etc
+    char buffer[data_size+1];
+    char *ptr = buffer;
+
     // checking rows for XMAS (forward direction)
     for (int i = 0; i < data_size; i++) {
         for (int j = 0; j < data_size-3; j++) {
             strncpy(window, matrix[i] + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
-                printf("XMAS found! (row)\n");
+                //printf("XMAS found! (row)\n");
                 xmasses++;
             }
         }
+        // flip the row
+        for (int j = data_size-1; j >= 0; j--) {
+            *ptr++ = matrix[i][j];
+        }
+        buffer[data_size] = '\0';
+
+        // check flipped row for XMAS
+        for (int j = 0; j < data_size-3; j++) {
+            strncpy(window, buffer + j, 4);
+            window[4] = '\0';
+            if (strcmp(window, "XMAS") == 0) {
+                xmasses++;
+            }
+        }
+
+        // reset the buffer
+        ptr = buffer;
     }
 
     // checking columns for XMAS (forward direction)
-    char buffer[data_size+1];
-    char *ptr = buffer;
     for (int i = 0; i < data_size; i++) {
 
         // invert the matrix and put it into a buffer
@@ -112,20 +132,38 @@ int main(int argv, char **argc)
         }
         buffer[data_size] = '\0';
 
-        // same approach as rows, but on buffer
+        // check the buffer for XMAS
         for (int j = 0; j < data_size-3; j++) {
             strncpy(window, buffer + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
-                printf("XMAS found! (column)\n");
+                //printf("XMAS found! (column)\n");
                 xmasses++;
             }
         }
+        ptr = buffer;
+
+        // read the column into the buffer in reverse
+        for (int j = data_size-1; j >= 0; j--) {
+            *ptr++ = matrix[j][i];
+        }
+
+        buffer[data_size] = '\0';
+
+        for (int j = 0; j < data_size-3; j++) {
+            strncpy(window, buffer + j, 4);
+            window[4] = '\0';
+            if (strcmp(window, "XMAS") == 0) {
+                xmasses++;
+            }
+        }
+
         // reset the buffer
         ptr = buffer;
     }
 
     // free up the memory for the matrix before exit
+    printf("Xmasses: %d\n", xmasses);
     free_matrix(matrix, matrix_size);
 }
 
