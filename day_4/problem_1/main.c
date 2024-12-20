@@ -16,7 +16,7 @@ int main(int argv, char **argc)
     }
 
     FILE *fp;
-    char ch;
+    signed char ch; // 'signed' for portability...
     char **matrix = NULL;
     char window[5];
     int i, j;
@@ -37,7 +37,7 @@ int main(int argv, char **argc)
     // read the file into a matrix, resizing the matrix's memory as we go
     // (should put this in a function...)
     i = j = 0;
-    while ((ch = getc(fp)) > 0) {
+    while ((ch = getc(fp)) != EOF) {
         if (i == matrix_size || j == matrix_size) {
 
             // starting from a matrix size of 0, rescale matrix if data gets too big
@@ -160,6 +160,19 @@ int main(int argv, char **argc)
 
         // reset the buffer
         ptr = buffer;
+    }
+
+    printf("\n");
+    
+    // checking south-east/north-west diagonal
+    for (int i = 0; i < 10; i++) {
+        int k = data_size -1;
+        for (int j = 0; j < i; j++) {
+            printf("%d, %d\n", j, k);
+            printf("%c ", matrix[j][k]);
+            k--;
+        }
+        printf("\n");
     }
 
     // free up the memory for the matrix before exit
