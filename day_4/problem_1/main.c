@@ -20,6 +20,7 @@ int main(int argv, char **argc)
     char **matrix = NULL;
     char window[5];
     int i, j;
+    int x, y;
     int matrix_size = 0;
     int data_size;
     int xmasses = 0;
@@ -86,8 +87,8 @@ int main(int argv, char **argc)
     // assigning final matrix size to 'data_size'
     data_size = i;
 
-    // print the matrix to see what's going on
-    print_matrix(matrix, data_size);
+    // (for debug) print the matrix to see what's going on
+    //print_matrix(matrix, data_size);
 
     // initialise buffer and buffer pointer to
     // reverse strings etc
@@ -100,33 +101,20 @@ int main(int argv, char **argc)
             strncpy(window, matrix[i] + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
-                //printf("XMAS found! (row)\n");
+                xmasses++;
+            }
+            if (strcmp(window, "SAMX") == 0) {
                 xmasses++;
             }
         }
-        // flip the row
-        for (int j = data_size-1; j >= 0; j--) {
-            *ptr++ = matrix[i][j];
-        }
-        buffer[data_size] = '\0';
-
-        // check flipped row for XMAS
-        for (int j = 0; j < data_size-3; j++) {
-            strncpy(window, buffer + j, 4);
-            window[4] = '\0';
-            if (strcmp(window, "XMAS") == 0) {
-                xmasses++;
-            }
-        }
-
-        // reset the buffer
+        // reset the buffer pointer
         ptr = buffer;
     }
 
     // checking columns for XMAS (forward direction)
     for (int i = 0; i < data_size; i++) {
 
-        // invert the matrix and put it into a buffer
+        // use inverted indexing to load column
         for (int j = 0; j < data_size; j++) {
             *ptr++ = matrix[j][i];
         }
@@ -137,42 +125,99 @@ int main(int argv, char **argc)
             strncpy(window, buffer + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
-                //printf("XMAS found! (column)\n");
+                xmasses++;
+            }
+            if (strcmp(window, "SAMX") == 0) {
                 xmasses++;
             }
         }
+        // reset the buffer pointer
         ptr = buffer;
+    }
 
-        // read the column into the buffer in reverse
-        for (int j = data_size-1; j >= 0; j--) {
-            *ptr++ = matrix[j][i];
+    
+    ptr = buffer;
+    // iterate through north-east corner & center line
+    for (int i = 3; i < data_size; i++) {
+        // read diagonal into buffer
+        for (int j = 0; j <= i; j++) {
+            x = j;
+            y = (j - i) + data_size - 1;
+            *ptr++ = matrix[x][y];
         }
 
-        buffer[data_size] = '\0';
-
-        for (int j = 0; j < data_size-3; j++) {
+        // check buffer for hits
+        for (int j = 0; j < i-2; j++) {
             strncpy(window, buffer + j, 4);
             window[4] = '\0';
             if (strcmp(window, "XMAS") == 0) {
                 xmasses++;
             }
+            if (strcmp(window, "SAMX") == 0) {
+                xmasses++;
+            }
         }
-
-        // reset the buffer
         ptr = buffer;
     }
 
-    printf("\n");
-    
-    // checking south-east/north-west diagonal
-    for (int i = 0; i < 10; i++) {
-        int k = data_size -1;
-        for (int j = 0; j < i; j++) {
-            printf("%d, %d\n", j, k);
-            printf("%c ", matrix[j][k]);
-            k--;
+    // iterate through south-west corner, same deal
+    for (int i = data_size - 2; i >= 3; i--) {
+        for (int j = i; j >= 0; j--) {
+            x = (j - data_size + 1) * -1;
+            y = (i - j);
+            *ptr++ = matrix[x][y];
         }
-        printf("\n");
+        for (int j = 0; j < i-2; j++) {
+            strncpy(window, buffer + j, 4);
+            window[4] = '\0';
+            if (strcmp(window, "XMAS") == 0) {
+                xmasses++;
+            }
+            if (strcmp(window, "SAMX") == 0) {
+                xmasses++;
+            }
+        }
+        ptr = buffer;
+    }
+
+    // iterate through north-west corner & center line
+    for (int i = 0; i < data_size; i++) {
+        for (int j = 0; j <= i; j++) {
+            y = i - j;
+            x = j;
+            *ptr++ = matrix[x][y];
+        }
+        for (int j = 0; j < i-2; j++) {
+            strncpy(window, buffer + j, 4);
+            window[4] = '\0';
+            if (strcmp(window, "XMAS") == 0) {
+                xmasses++;
+            }
+            if (strcmp(window, "SAMX") == 0) {
+                xmasses++;
+            }
+        }
+        ptr = buffer;
+    }
+
+    // iterate through south-east corner
+    for (int i = data_size - 2; i >= 0; i--) {
+        for (int j = 0; j <= i; j++) {
+            x = j - i + data_size - 1;
+            y = data_size - j - 1;
+            *ptr++ = matrix[x][y];
+        }
+        for (int j = 0; j < i-2; j++) {
+            strncpy(window, buffer + j, 4);
+            window[4] = '\0';
+            if (strcmp(window, "XMAS") == 0) {
+                xmasses++;
+            }
+            if (strcmp(window, "SAMX") == 0) {
+                xmasses++;
+            }
+        }
+        ptr = buffer;
     }
 
     // free up the memory for the matrix before exit
